@@ -1,0 +1,30 @@
+version: "3.1"
+
+services:
+  # Only one ES node 1 enough for this sample data import
+  es-01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.0
+    ports:
+      - 9200:9200
+    volumes:
+      - data-01:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+  importer-svc:
+    image: csv_to_es_from_python_script:0.1
+    deploy:
+      restart_policy:
+        condition: "none" # Make sure we create one shot service/container
+    depends_on:
+      - es-01
+    environment:
+      - ES_HOST=es-01
+      - WAIT_COMMAND=[ $$(curl --write-out %{http_code} --silent --output /dev/null http://es-01:9200/_cat/health?h=st) = 200 ]
+      - WAIT_START_CMD=python csv_to_es_using_pandas.py
+      - WAIT_SLEEP=2
+      - WAIT_LOOPS=150
+
+volumes:
+  data-01:
+    driver: local
+
