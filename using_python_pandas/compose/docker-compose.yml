@@ -11,7 +11,7 @@ services:
     environment:
       - discovery.type=single-node
   importer-svc:
-    image: csv_to_es_from_python_script:0.1
+    image: girishsv1986/csv_to_es_import:0.1
     deploy:
       restart_policy:
         condition: "none" # Make sure we create one shot service/container
